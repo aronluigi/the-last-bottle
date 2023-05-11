@@ -1,0 +1,61 @@
+.grid-wrapper {
+  min-width: 1280px;
+  min-height: 720px;
+  margin: 0 auto;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 1px;
+}
+
+.wrapper-inner{
+  display: grid;
+  grid-gap: 1px;
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+  align-items: strech;
+}
+
+.box {
+  text-align: center;
+  background: #ccc;
+}
+
+.top {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  grid-row-end: 1;
+  display: grid;
+  align-items: stretch;
+}
+
+.box-inner{
+  text-align: center;
+  align-self: center;
+  font-size: 10px;
+}
+
+.box.area {
+  background-color: red;
+}
+
+.box.start {
+  background-color: blue !important;
+}
+
+
+
+.box>.player, .box>.npc {
+  display: block;
+  width: 70%;
+  height: 70%;
+  margin: 15% 15%;
+}
+
+.box>.player {
+  background-color: yellow;
+}
+
+.box>.npc {
+  background-color: black;
+}

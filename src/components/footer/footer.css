@@ -1,0 +1,28 @@
+.footer {
+    min-width: 1280px;
+    min-height: 50px;
+    margin: 0 auto;
+    padding: 0px 25px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footer>.legend {
+    align-self: flex-start;
+}
+
+.footer>.legend>ul>li {
+    list-style: none;
+}
+
+.footer>.legend>ul>li.active {
+    background-color: #666;
+}
+
+.footer>.legend>ul>li>span {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1.2em;
+}

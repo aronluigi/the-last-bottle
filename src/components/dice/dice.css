@@ -1,0 +1,25 @@
+.dice {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+
+.dice>.label,
+.dice>.value-label {
+    text-transform: uppercase;
+    padding: 0 10px;
+}
+
+.dice>.value {
+    width: 30px;
+    height: 27px;
+    border: 1px solid #ccc;
+    text-align: center;
+    padding-top: 3px;
+}
+
+.dice>.value-label {
+    font-weight: bold;
+    min-width: 35px;
+    text-align: center;
+}
