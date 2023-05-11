@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { Cell, Direction, GameActions, GameState, Player } from "./types"
 
 export const GridWidth = 42 // columns
@@ -23,8 +24,12 @@ const getRandomIntInclusive = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+const getRandomInt = (max: number): number => {
+    return Math.floor(Math.random() * max)
+}
+
 const createBoard = (w: number, h: number): null[][] => {
-    return Array.from(new Array(h), () => Array(w).fill(null))
+    return Array.from(new Array(h), () => Array.from({ length: w }))
 }
 
 const calculateCellPos = (centerIndex: number, currentIndex: number, maxIndex: number, radius: number): number => {
@@ -44,8 +49,8 @@ const calculateCellPos = (centerIndex: number, currentIndex: number, maxIndex: n
 
 const spawnGPgp = (radius: number, gw: number, gh: number): [Cell, Cell[][], string[]] => {
     const spawn: Cell = {
-        col: Math.floor(Math.random() * (gw - 1)),
-        row: Math.floor(Math.random() * (gh - 1))
+        col: getRandomInt(gw - 1),
+        row: getRandomInt(gh - 1)
     }
 
     const edgeLen = radius * 2 + 1
@@ -60,19 +65,21 @@ const spawnGPgp = (radius: number, gw: number, gh: number): [Cell, Cell[][], str
     return [spawn, area, searchMap]
 }
 
-const getStartPos = (GPgpSearchMap: string[], gw: number, gh: number): Cell => {
-    const c = Math.floor(Math.random() * (gw - 1))
-    const r = Math.floor(Math.random() * (gh - 1))
+const getStartPos = (GPgpSearchMap: string[], gw: number, gh: number, retries = 10): Cell => {
+    if (retries < 0) throw new Error("env.getStartPos max reties reached!")
+
+    const c = getRandomInt(gw - 1)
+    const r = getRandomInt(gh - 1)
 
     if (GPgpSearchMap.includes(`${r}x${c}`)) {
-        return getStartPos(GPgpSearchMap, gw, gh)
+        return getStartPos(GPgpSearchMap, gw, gh, retries - 1)
     }
 
     return { col: c, row: r } as Cell
 }
 
 const getRandomDirection = (prevDirection: Direction | null): [number, Direction] => {
-    const rand = Math.floor(Math.random() * directions.length)
+    const rand = getRandomInt(directions.length)
     const d = directions[rand]
 
     if (prevDirection !== null && (d === prevDirection || d === oppositeDirections[prevDirection])) {
@@ -144,7 +151,6 @@ const getWinner = (state: GameState): Player | null => {
     const playerColl = playerPosMap
         .map((v, i) => playerPosMap.map((vv, ii) => ii === i ? null : vv).includes(v))
         .map((v, i) => v ? i : null)
-        .filter(v => v !== null)
         .filter(v => v !== null && !state.players[v].npc)
 
     if (playerColl.length !== 0) {
@@ -168,21 +174,21 @@ export const GameReducer = (state: GameState, action: GameActions) => {
         case 'step': {
             if (state.done) return state
 
-            const dl = state.diceDirection?.label
-            const dv = state.diceDirection?.value
-            const sl = state.stepsLeft
+            const directionDiceLabel = state.diceDirection?.label
+            const directionDiceValue = state.diceDirection?.value
+            const stepsLeft = state.stepsLeft
 
-            if (dl === undefined || dv === undefined || sl === 0) {
+            if (directionDiceLabel === undefined || directionDiceValue === undefined || stepsLeft === 0) {
                 return state
             }
 
-            const p = state.players
-            const nsl = sl - 1
-            p[state.playerTurnIndex].pos = move(dl, 1, p[state.playerTurnIndex].pos, state.board[0].length - 1, state.board.length - 1)
+            const players = state.players
+            const nsl = stepsLeft - 1
+            players[state.playerTurnIndex].pos = move(directionDiceLabel, 1, players[state.playerTurnIndex].pos, state.board[0].length - 1, state.board.length - 1)
 
             const newState: GameState = {
                 ...state,
-                players: [...p],
+                players: [...players],
                 stepsLeft: nsl,
                 playerTurnIndex: nsl === 0 ? (state.playerTurnIndex + 1) % state.players.length : state.playerTurnIndex,
             }
@@ -195,17 +201,17 @@ export const GameReducer = (state: GameState, action: GameActions) => {
         case 'roll': {
             if (state.done) return state
 
-            const ds = getRandomIntInclusive(1, 6)
-            const [dv, dl] = getRandomDirection(state.diceDirection !== null ? state.diceDirection.label : null)
+            const steps = getRandomIntInclusive(1, 6)
+            const [directionDiceValue, directionDiceLabel] = getRandomDirection(state.diceDirection !== null ? state.diceDirection.label : null)
 
             return {
                 ...state,
-                diceSteps: ds,
+                diceSteps: steps,
                 diceDirection: {
-                    label: dl,
-                    value: dv
+                    label: directionDiceLabel,
+                    value: directionDiceValue
                 },
-                stepsLeft: ds,
+                stepsLeft: steps,
             } as GameState
         }
         case 'new': {
